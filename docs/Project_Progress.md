@@ -18,7 +18,7 @@ Use this checklist to track progress. Each step links to a detailed prompt in `p
   - Implement `server/db.js` for SQLite connection, schema checks, and query helpers.
   - Prompt: `prompts/04_db_layer.md`
 
-- [ ] 05 — API endpoints and Express server
+- [X] 05 — API endpoints and Express server
   - Implement `POST /api/plan` and `GET /api/suggest/targets`, static serving, and dev server script.
   - Prompt: `prompts/05_api_server.md`
 
