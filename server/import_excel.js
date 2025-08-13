@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const process = require('node:process');
 const XLSX = require('xlsx');
-const { getDb, dbFilePath, prepare, transaction } = require('./db');
+const { getDb, prepare, transaction } = require('./db');
 
 const START_TS = Date.now();
 
@@ -382,7 +382,15 @@ function main() {
 
     const stats = runImport(inputPath);
     // Surface a brief success line with db path
-    logInfo(`SQLite DB ready at ${dbFilePath}`);
+    let resolvedDbFile = null;
+    try {
+      const { getDb: _g, getDbFilePath: _getDbFilePath } = require('./db');
+      const db = _g();
+      resolvedDbFile = (db && db.name) ? db.name : (_getDbFilePath ? _getDbFilePath() : null);
+      logInfo(`SQLite DB ready at ${resolvedDbFile}`);
+    } catch (e) {
+      logWarn(`Could not resolve DB file path: ${e.message}`);
+    }
     // Optionally, write a tiny summary file to aid later agents
     try {
       const summaryDir = path.resolve(ROOT_DIR, 'Agent Summaries');
@@ -392,7 +400,7 @@ function main() {
         '# Agent Summary — 02 Ingest Excel',
         '',
         `Workbook: ${inputPath}`,
-        `Output DB: ${dbFilePath}`,
+        `Output DB: ${resolvedDbFile}`,
         '',
         `Sheets=${stats.totalSheets} Rows=${stats.totalRows} Inserted=${stats.inserted} Deduped=${stats.deduped} Skipped=${stats.skipped}`,
         `Warnings: missingDilutionPrimaries=${stats.warnMissingDilutionPrimaries}, missingStockSecondaries=${stats.warnMissingStockSecondaries}, duplicates=${stats.warnDuplicates}, rowIssues=${stats.warnRowIssues}`,

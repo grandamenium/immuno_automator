@@ -9,7 +9,8 @@ try {
   Database = null;
 }
 
-const dbFilePath = path.resolve(__dirname, '..', 'sqlite', 'ihc.sqlite');
+const defaultProjectDbPath = path.resolve(__dirname, '..', 'sqlite', 'ihc.sqlite');
+let dbFilePath = null;
 let dbInstance = null;
 
 function logInfo(msg) { console.log(`[db] ${msg}`); }
@@ -20,6 +21,37 @@ function ensureSqliteDirExists() {
   const dirPath = path.dirname(dbFilePath);
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+function determineDbFilePath() {
+  // 1) Explicit override wins
+  const envPath = process.env.DB_FILE && String(process.env.DB_FILE).trim();
+  if (envPath) {
+    const abs = path.resolve(envPath);
+    logInfo(`Using DB path from DB_FILE env: ${abs}`);
+    return abs;
+  }
+
+  // 2) Try using project sqlite directory (good for local dev)
+  const projectDir = path.dirname(defaultProjectDbPath);
+  try {
+    if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir, { recursive: true });
+    fs.accessSync(projectDir, fs.constants.W_OK);
+    return defaultProjectDbPath;
+  } catch (e) {
+    // 3) Fallback to /tmp (Render provides a writable ephemeral /tmp)
+    const tmpRoot = path.resolve(process.env.RUNNER_TEMP || '/tmp');
+    const tmpDir = path.join(tmpRoot, 'sqlite');
+    try {
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      fs.accessSync(tmpDir, fs.constants.W_OK);
+      logWarn(`Project directory not writable; falling back to ${tmpDir}`);
+      return path.join(tmpDir, 'ihc.sqlite');
+    } catch (e2) {
+      logErr('No writable directory for SQLite. Set DB_FILE to a writable path.');
+      throw e2;
+    }
   }
 }
 
@@ -61,6 +93,13 @@ CREATE INDEX IF NOT EXISTS idx_antibodies_em ON antibodies(emission_nm);
   safeRun('create_base_schema', ddl);
 }
 
+function getDbFilePath() {
+  if (!dbFilePath) {
+    dbFilePath = determineDbFilePath();
+  }
+  return dbFilePath;
+}
+
 function getDb() {
   if (dbInstance) return dbInstance;
   if (!Database) {
@@ -71,6 +110,8 @@ function getDb() {
     process.exitCode = 1;
     throw new Error('better-sqlite3 not installed');
   }
+  // Resolve DB file path once on first open
+  if (!dbFilePath) dbFilePath = determineDbFilePath();
   ensureSqliteDirExists();
   const existedBefore = fs.existsSync(dbFilePath);
   dbInstance = new Database(dbFilePath, { fileMustExist: false });
@@ -111,7 +152,8 @@ module.exports = {
   getDb,
   prepare,
   transaction,
-  dbFilePath
+  dbFilePath,
+  getDbFilePath
 };
 
 

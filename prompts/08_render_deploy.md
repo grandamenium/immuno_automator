@@ -32,7 +32,7 @@ Implementation steps:
 - Validate locally by running build and importer, then start and test endpoints.
 
 Acceptance checks:
-- Fresh environment can run the build/import/start pipeline without manual steps.
+- Fresh environment can run the build/import/start pipeline without manual steps.`
 - `/health` and static app served.
 - API responds correctly post-deploy.
 
