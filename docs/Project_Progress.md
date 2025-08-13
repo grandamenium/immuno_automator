@@ -14,7 +14,7 @@ Use this checklist to track progress. Each step links to a detailed prompt in `p
   - Color mapping, fluorophore lookup, matching rules, serum host unification, and volume/recipes calculations in `server/logic.js`. Cover with `node:test`.
   - Prompt: `prompts/03_logic_and_tests.md`
 
-- [ ] 04 — Database helper layer
+- [X] 04 — Database helper layer
   - Implement `server/db.js` for SQLite connection, schema checks, and query helpers.
   - Prompt: `prompts/04_db_layer.md`
 
