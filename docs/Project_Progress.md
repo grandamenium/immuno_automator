@@ -22,7 +22,7 @@ Use this checklist to track progress. Each step links to a detailed prompt in `p
   - Implement `POST /api/plan` and `GET /api/suggest/targets`, static serving, and dev server script.
   - Prompt: `prompts/05_api_server.md`
 
-- [ ] 06 — Frontend UI (React + Vite + TS)
+- [X] 06 — Frontend UI (React + Vite + TS)
   - Build minimal microbiology-themed UI: inputs for immunos, colors, and tables rendering.
   - Prompt: `prompts/06_frontend_ui.md`
 

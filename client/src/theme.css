@@ -38,4 +38,47 @@ main {
 
 p { color: var(--muted); }
 
+/* Utilities */
+.row { display: flex; gap: 12px; align-items: center; }
+.grow { flex: 1 1 auto; }
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Cards */
+.card { background: var(--card); border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); margin: 12px 0; }
+.card.warn { border: 1px solid #f59e0b; background: #fffbeb; }
+
+/* Form elements */
+label { display: block; font-weight: 600; margin-bottom: 4px; }
+input[type="number"], input[type="text"], select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; }
+button { appearance: none; border: 1px solid var(--accent); background: var(--accent); color: white; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+button.ghost { background: transparent; color: var(--accent); border-color: transparent; }
+
+/* Section layout */
+.immuno-section .section-header { display: flex; align-items: center; justify-content: space-between; }
+.immuno-grid { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 700px) {
+  .immuno-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.primary-row { display: grid; grid-template-columns: 1fr 180px 96px; gap: 12px; }
+@media (max-width: 480px) {
+  .primary-row { grid-template-columns: 1fr; }
+}
+.field { display: block; }
+.combo { display: flex; gap: 8px; }
+
+/* Suggest menu */
+.suggest-menu { list-style: none; margin: 6px 0 0; padding: 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; box-shadow: 0 6px 16px rgba(0,0,0,0.08); max-height: 200px; overflow: auto; }
+.suggest-menu li { padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.suggest-menu li.active, .suggest-menu li:hover { background: #eef2ff; }
+
+/* Tables */
+.tables { margin-top: 16px; }
+table.data { width: 100%; border-collapse: separate; border-spacing: 0; }
+table.data th, table.data td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+table.data thead th { font-size: 13px; color: var(--muted); font-weight: 700; }
+.cell .line-1 { font-weight: 600; }
+
 
