@@ -10,7 +10,7 @@ Use this checklist to track progress. Each step links to a detailed prompt in `p
   - Inspect `Inventory.xlsx`, design normalization to PRD schema, implement first-pass importer, produce `/sqlite/ihc.sqlite`.
   - Prompt: `prompts/02_ingest_excel.md`
 
-- [ ] 03 — Implement core logic (pure functions) + unit tests
+- [X] 03 — Implement core logic (pure functions) + unit tests
   - Color mapping, fluorophore lookup, matching rules, serum host unification, and volume/recipes calculations in `server/logic.js`. Cover with `node:test`.
   - Prompt: `prompts/03_logic_and_tests.md`
 
