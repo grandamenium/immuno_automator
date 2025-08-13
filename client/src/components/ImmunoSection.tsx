@@ -48,8 +48,9 @@ export default function ImmunoSection(props: ImmunoSectionProps): JSX.Element {
             signal: controller.signal
           });
           if (!res.ok) throw new Error(`Suggest HTTP ${res.status}`);
-          const data = (await res.json()) as string[];
-          setSuggestionsByPrimaryIndex(prev => ({ ...prev, [primaryIdx]: data.slice(0, 8) }));
+          const data = await res.json();
+          const suggestions = Array.isArray(data?.suggestions) ? data.suggestions as string[] : [];
+          setSuggestionsByPrimaryIndex(prev => ({ ...prev, [primaryIdx]: suggestions.slice(0, 8) }));
         } catch (err) {
           // Non-fatal during early UI bring-up
           // eslint-disable-next-line no-console

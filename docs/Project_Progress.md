@@ -26,7 +26,7 @@ Use this checklist to track progress. Each step links to a detailed prompt in `p
   - Build minimal microbiology-themed UI: inputs for immunos, colors, and tables rendering.
   - Prompt: `prompts/06_frontend_ui.md`
 
-- [ ] 07 — Frontend integration + niceties
+- [X] 07 — Frontend integration + niceties
   - Wire to API, render 3 tables, CSV export buttons, and persist last run in `localStorage`.
   - Prompt: `prompts/07_frontend_integration.md`
 

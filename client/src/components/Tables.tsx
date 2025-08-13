@@ -34,17 +34,128 @@ export interface SolutionsBreakdown {
 }
 
 interface TablesProps {
-  primariesTable: PrimariesTableCell[][]; // rows by immuno, 3 columns max
-  secondariesTable: SecondariesTableCell[][];
+  primariesTable: Array<Array<PrimariesTableCell | null>>; // rows by immuno, 3 columns max
+  secondariesTable: Array<Array<SecondariesTableCell | null>>;
   solutions: SolutionsBreakdown[];
 }
 
 export function Tables(props: TablesProps): JSX.Element {
   const { primariesTable, secondariesTable, solutions } = props;
+
+  function download(filename: string, text: string): void {
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function escapeCsv(value: unknown): string {
+    const s = value == null ? '' : String(value);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function handleExportPrimaries(): void {
+    const headers = [
+      'Immuno #',
+      'Ab1 Name','Ab1 Ig','Ab1 Dilution','Ab1 Location',
+      'Ab2 Name','Ab2 Ig','Ab2 Dilution','Ab2 Location',
+      'Ab3 Name','Ab3 Ig','Ab3 Dilution','Ab3 Location'
+    ];
+    const rows = primariesTable.map((row, rIdx) => {
+      const cells = [0,1,2].map(c => row[c]);
+      const parts = [String(rIdx + 1)];
+      cells.forEach((cell) => {
+        parts.push(
+          escapeCsv(cell?.name || 'N/A'),
+          escapeCsv(cell?.igClass || ''),
+          escapeCsv(cell?.dilution || ''),
+          escapeCsv(cell?.location || '')
+        );
+      });
+      return parts.join(',');
+    });
+    download('primaries.csv', [headers.join(','), ...rows].join('\n'));
+  }
+
+  function handleExportSecondaries(): void {
+    const headers = [
+      'Immuno #',
+      'Ab1 Name','Ab1 Host','Ab1 Ig','Ab1 Emission (nm)','Ab1 Location',
+      'Ab2 Name','Ab2 Host','Ab2 Ig','Ab2 Emission (nm)','Ab2 Location',
+      'Ab3 Name','Ab3 Host','Ab3 Ig','Ab3 Emission (nm)','Ab3 Location'
+    ];
+    const rows = secondariesTable.map((row, rIdx) => {
+      const cells = [0,1,2].map(c => row[c]);
+      const parts = [String(rIdx + 1)];
+      cells.forEach((cell) => {
+        parts.push(
+          escapeCsv(cell?.name || 'N/A'),
+          escapeCsv(cell?.host || ''),
+          escapeCsv(cell?.igSpecificity || ''),
+          escapeCsv(cell?.emission_nm ?? ''),
+          escapeCsv(cell?.location || '')
+        );
+      });
+      return parts.join(',');
+    });
+    download('secondaries.csv', [headers.join(','), ...rows].join('\n'));
+  }
+
+  function handleExportSolutions(): void {
+    const headers = [
+      'Immuno #',
+      'Blocking Total (mL)','Serum1 Host','Serum1 (mL)','Serum2 Host','Serum2 (mL)','PBST+BSA (mL)',
+      'Primary Total (mL)','Primary Ab1 (µL)','Primary Ab2 (µL)','Primary Ab3 (µL)','Primary Diluent Block (mL)','Primary Diluent PBST (mL)',
+      'Secondary Total (mL)','Secondary Ab1 (µL)','Secondary Ab2 (µL)','Secondary Ab3 (µL)','Secondary PBST (mL)'
+    ];
+    const rows = solutions.map((s, rIdx) => {
+      const serumOnly = s.blocking.components.filter(c => /^Serum \(/.test(c.label));
+      const pbst = s.blocking.components.find(c => /PBST/.test(c.label));
+      const serum1 = serumOnly[0];
+      const serum2 = serumOnly[1];
+      const primAb = s.primary.antibodies;
+      const secAb = s.secondary.antibodies;
+      const parts: (string)[] = [String(rIdx + 1)];
+      parts.push(
+        escapeCsv(s.blocking.total_mL.toFixed(2)),
+        escapeCsv(serum1 ? serum1.label.replace(/^Serum \((.*)\)$/,'$1') : ''),
+        escapeCsv(serum1 ? serum1.volume_mL.toFixed(2) : ''),
+        escapeCsv(serum2 ? serum2.label.replace(/^Serum \((.*)\)$/,'$1') : ''),
+        escapeCsv(serum2 ? serum2.volume_mL.toFixed(2) : ''),
+        escapeCsv(pbst ? pbst.volume_mL.toFixed(2) : '')
+      );
+      parts.push(
+        escapeCsv(s.primary.total_mL.toFixed(2)),
+        escapeCsv(primAb[0]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(primAb[1]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(primAb[2]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(s.primary.diluent.blocking_mL.toFixed(2)),
+        escapeCsv(s.primary.diluent.pbst_mL.toFixed(2))
+      );
+      parts.push(
+        escapeCsv(s.secondary.total_mL.toFixed(2)),
+        escapeCsv(secAb[0]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(secAb[1]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(secAb[2]?.stock_uL.toFixed(1) || ''),
+        escapeCsv(s.secondary.pbst_mL.toFixed(2))
+      );
+      return parts.join(',');
+    });
+    download('solutions.csv', [headers.join(','), ...rows].join('\n'));
+  }
   return (
     <section className="tables">
       <div className="card">
         <h3>Primaries</h3>
+        <div className="row" style={{ justifyContent: 'flex-end' }}>
+          <button type="button" onClick={handleExportPrimaries} aria-label="Export primaries as CSV">Export CSV</button>
+        </div>
         <table className="data">
           <thead>
             <tr>
@@ -81,6 +192,9 @@ export function Tables(props: TablesProps): JSX.Element {
 
       <div className="card">
         <h3>Secondaries</h3>
+        <div className="row" style={{ justifyContent: 'flex-end' }}>
+          <button type="button" onClick={handleExportSecondaries} aria-label="Export secondaries as CSV">Export CSV</button>
+        </div>
         <table className="data">
           <thead>
             <tr>
@@ -117,6 +231,9 @@ export function Tables(props: TablesProps): JSX.Element {
 
       <div className="card">
         <h3>Solutions</h3>
+        <div className="row" style={{ justifyContent: 'flex-end' }}>
+          <button type="button" onClick={handleExportSolutions} aria-label="Export solutions as CSV">Export CSV</button>
+        </div>
         <table className="data">
           <thead>
             <tr>

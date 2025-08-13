@@ -81,4 +81,9 @@ table.data th, table.data td { text-align: left; padding: 8px 10px; border-botto
 table.data thead th { font-size: 13px; color: var(--muted); font-weight: 700; }
 .cell .line-1 { font-weight: 600; }
 
+/* Toast */
+.toast { margin: 8px 0 12px; padding: 10px 12px; border-radius: 8px; font-weight: 600; }
+.toast.info { background: #ecfeff; color: #155e75; border: 1px solid #67e8f9; }
+.toast.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
 
